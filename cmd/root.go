@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -25,7 +26,8 @@ var rootCmd = &cobra.Command{
 		zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
 		http.HandleFunc("/*", func(w http.ResponseWriter, req *http.Request) {
-			io.WriteString(w, "Hello, world!\n")
+      url := filepath.Join(*origin, req.URL.Path)
+			io.WriteString(w, url)
 		})
 
 		addr := fmt.Sprintf(":%s", *port)
