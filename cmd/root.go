@@ -2,10 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"os"
-	"path/filepath"
+	"strings"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -25,15 +24,25 @@ var rootCmd = &cobra.Command{
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 		zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
-		http.HandleFunc("/*", func(w http.ResponseWriter, req *http.Request) {
-      url := filepath.Join(*origin, req.URL.Path)
-			io.WriteString(w, url)
-		})
+		http.HandleFunc("/*", handler)
 
 		addr := fmt.Sprintf(":%s", *port)
 		log.Info().Msgf("Server listening on port %s", *port)
 		log.Fatal().Err(http.ListenAndServe(addr, nil)).Send()
 	},
+}
+
+func handler(w http.ResponseWriter, req *http.Request) {
+	normalizedOrigin := strings.TrimRight(*origin, "/")
+	url := fmt.Sprintf("%s%s", normalizedOrigin, req.URL.Path)
+	log.Info().Msgf("Requesting API: %s", url)
+
+	res, err := http.Get(url)
+	if err != nil {
+		log.Fatal().Err(err).Send()
+	}
+
+	res.Write(w)
 }
 
 func Execute() {
@@ -45,5 +54,5 @@ func Execute() {
 
 func init() {
 	port = rootCmd.Flags().StringP("port", "p", "3000", "Port to run the proxy on")
-	origin = rootCmd.Flags().StringP("origin", "o", "http://dummyjson.com", "Origin server to proxy requests to")
+	origin = rootCmd.Flags().StringP("origin", "o", "https://dummyjson.com", "Origin server to proxy requests to")
 }
