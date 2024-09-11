@@ -1,4 +1,4 @@
-module github.com/Aspen-Edu/cache-proxy
+module github.com/lucasForato/cache-proxy
 
 go 1.22.2
 

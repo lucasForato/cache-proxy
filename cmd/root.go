@@ -24,7 +24,7 @@ var rootCmd = &cobra.Command{
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 		zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
-		http.HandleFunc("/*", handler)
+		http.HandleFunc("/", handler)
 
 		addr := fmt.Sprintf(":%s", *port)
 		log.Info().Msgf("Server listening on port %s", *port)
